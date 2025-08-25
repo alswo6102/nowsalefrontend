@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import useStore from '../hooks/store/useStore';
 import useUserInfo from '../hooks/user/useUserInfo';
@@ -18,11 +18,11 @@ import { fetchMenuItemDetails, createReservation } from '../apis/storeAPI';
 
 const ReservationPage = ({ shop }) => {
   const navigate = useNavigate();
+  const { id } = useParams();
   
   const { 
     selectedMenu, 
     selectedDesigner, 
-    currentTime, 
     cancelReservation, 
     togglePiAgreement, 
     showPiAgreement, 
@@ -156,7 +156,11 @@ const ReservationPage = ({ shop }) => {
 
   // 화살표 버튼 클릭 핸들러
   const handleArrowClick = () => {
-    togglePiAgreement();
+    console.log('🔍 화살표 버튼 클릭 - 현재 URL:', window.location.pathname);
+    console.log('🔍 showPiAgreement 상태:', showPiAgreement);
+    togglePiAgreement(); // true로 설정
+    navigate(`/shop/${id}/reservation/agreement`);
+    console.log('🔍 agreement URL로 이동 완료');
   };
 
   const getErrorMessage = (error) => {
@@ -216,7 +220,13 @@ const ReservationPage = ({ shop }) => {
         <PiAgreementContainer>
           <SectionTitle>개인정보 제3자 제공 동의서</SectionTitle>
           <PiAgreement />
-          <CloseButton onClick={togglePiAgreement}>닫기</CloseButton>
+          <CloseButton onClick={() => {
+            console.log('🔍 닫기 버튼 클릭 - 현재 URL:', window.location.pathname);
+            console.log('🔍 showPiAgreement 상태:', showPiAgreement);
+            togglePiAgreement(); // false로 설정
+            navigate(`/shop/${id}/reservation`);
+            console.log('🔍 reservation URL로 이동 완료');
+          }}>닫기</CloseButton>
         </PiAgreementContainer>
       ) : (
         <>
@@ -240,6 +250,7 @@ const ReservationPage = ({ shop }) => {
                     discountPrice: menuData.discounted_price,
                     isReserved: false,
                     menuImage: menuData.menu_image_url,
+                    isReservationPage: true
                   }}
                   onReserve={() => {}}
                 />

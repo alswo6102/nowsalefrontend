@@ -499,13 +499,12 @@ const useStore = create(
             const maxAge = 24 * 60 * 60 * 1000; // 24시간
             
             if (dataAge < maxAge) {
-              console.log('✅ 예약 데이터가 유효함 (24시간 이내)');
               set({
                 isReserving: true,
                 selectedMenu: data.menu,
                 selectedDesigner: data.designer,
                 isAgreed: false,
-                showPiAgreement: false,
+                //showPiAgreement: false,
               });
               return true;
             } else {

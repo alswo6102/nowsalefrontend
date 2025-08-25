@@ -53,9 +53,6 @@ const MenuCard = ({ menu, onReserve = false }) => {
         return "예약하기";
     };
 
-    // 예약 불가능 상태에 따른 카드 스타일 결정
-    const isUnavailable = isReserved;
-
     // 이미지 로드 실패 시 임시 이미지로 대체
     const handleImageError = (e) => {
         console.warn(`메뉴 이미지 로드 실패: ${menuName}, using fallback`);
@@ -64,7 +61,7 @@ const MenuCard = ({ menu, onReserve = false }) => {
     };
 
   return (
-    <Card isUnavailable={isUnavailable}>
+    <Card>
         <Div>
             <MenuImage 
                 src={menuImage} 
@@ -72,18 +69,18 @@ const MenuCard = ({ menu, onReserve = false }) => {
                 onError={handleImageError}
             />
             <Detail>
-                <MenuName isUnavailable={isUnavailable}>
-                    {isUnavailable
+                <MenuName isReservationPage={menu.isReservationPage}>
+                    {menu.isReservationPage
                         ? menuName
                         : menuName.length > 13
                         ? `${menuName.slice(0, 13)}...`
                         : menuName}
                 </MenuName>
                 <PriceInfo>
-                    <DiscountRate isUnavailable={isUnavailable}>{discountRate}%</DiscountRate>
-                    <OriginalPrice isUnavailable={isUnavailable}>{originalPrice.toLocaleString()}원</OriginalPrice>
+                    <DiscountRate>{discountRate}%</DiscountRate>
+                    <OriginalPrice>{originalPrice.toLocaleString()}원</OriginalPrice>
                 </PriceInfo>
-                <DiscountPrice isUnavailable={isUnavailable}>{discountPrice.toLocaleString()}원</DiscountPrice>
+                <DiscountPrice>{discountPrice.toLocaleString()}원</DiscountPrice>
             </Detail>
         </Div>
         <ButtonContainer>

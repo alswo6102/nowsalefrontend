@@ -42,9 +42,6 @@ export const DesignerName = styled.h3`
     font-weight: 600;
     line-height: 14px;
     color: #000;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 `;
 
 /* 최대 할인율 텍스트 */

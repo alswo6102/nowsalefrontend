@@ -13,8 +13,8 @@ export const Card = styled.div`
     align-items: center;
     gap: 8px;
     margin-bottom: 12px;
-    background-color: ${props => props.isUnavailable ? '#FFF2F2' : '#fff'}; /* 예약 불가능 상태일 때 배경색 변경 */
-    border-color: ${props => props.isUnavailable ? '#DA2538' : '#CCC'}; /* 예약 불가능 상태일 때 테두리 색 변경 */
+    background-color: #fff;
+    border-color: #CCC;
 `;
 
 export const Div = styled.div`
@@ -46,7 +46,6 @@ export const MenuName = styled.h3`
     color: #000;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: pre-wrap;
 `;
 
 /* 가격 정보 (할인율과 원래 가격) */
@@ -69,7 +68,7 @@ export const DiscountRate = styled.span`
 export const OriginalPrice = styled.span`
     font-size: 12px;
     color: #737373;
-    text-decoration: ${props => props.isUnavailable ? 'line-through' : 'line-through'}; /* 예약 불가능 상태일 때 취소선 제거 */
+    text-decoration: line-through;
 `;
 
 /* 할인 가격 */

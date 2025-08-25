@@ -58,6 +58,7 @@ function App() {
             <Route path="/shop/:id/spaces" element={<ShopDetailPage />} />
             <Route path="/shop/:id/space/:spaceId" element={<ShopDetailPage />} />
             <Route path="/shop/:id/reservation" element={<ShopDetailPage />} />
+            <Route path="/shop/:id/reservation/agreement" element={<ShopDetailPage />} />
             {/* 마이페이지 관련 페이지들 */}
             <Route path="/notice" element={<NoticePage />} />
             <Route path="/faq" element={<FAQPage />} />

@@ -71,6 +71,9 @@ const ShopDetailPage = () => {
         if (pathParts.length === 4 && pathParts[3] === 'reservation') {
             return { type: 'reservation', storeId }; // 예약 페이지
         }
+        if (pathParts.length === 5 && pathParts[3] === 'reservation' && pathParts[4] === 'agreement') {
+            return { type: 'agreement', storeId }; // 개인정보 동의서 페이지
+        }
         return { type: 'entry-point', storeId };
     };
 
@@ -155,6 +158,17 @@ const ShopDetailPage = () => {
         // URL이 변경되었을 때
         if (previousPathnameRef.current !== location.pathname) {
             const urlState = getShopDetailStateFromUrl();
+            
+            // URL 기반으로 showPiAgreement 상태 동기화 (브라우저 뒤로가기/앞으로가기 시에만)
+            if (urlState.type === 'agreement') {
+                if (!showPiAgreement) {
+                    console.log('🔍 브라우저 네비게이션 - showPiAgreement true로 설정');
+                    togglePiAgreement();
+                }
+            } else if (showPiAgreement) {
+                console.log('🔍 브라우저 네비게이션 - showPiAgreement false로 설정');
+                togglePiAgreement();
+            }
             
             // Space 목록 페이지에서 entry-point로 이동한 경우 (브라우저 뒤로가기로 추정)
             if (previousPathnameRef.current.includes('/spaces') && urlState.type === 'entry-point') {
@@ -262,7 +276,7 @@ const ShopDetailPage = () => {
             // 이전 URL 업데이트
             previousPathnameRef.current = location.pathname;
         }
-    }, [location.pathname, navigate, showPiAgreement, selectedSpaceId, storeData, fromFavoritePage, fromSchedulePage]);
+    }, [location.pathname, navigate, selectedSpaceId, storeData, fromFavoritePage, fromSchedulePage]);
 
     // 현재 가게의 Zustand 상태에서 좋아요 상태 가져오기
     const currentStore = stores.find(store => store.id === parseInt(id));
@@ -289,10 +303,12 @@ const ShopDetailPage = () => {
                 
                 const storeId = parseInt(id);
                 const urlState = getShopDetailStateFromUrl();
+                console.log('🔍 loadStoreData 시작 - URL 상태:', urlState);
                 
                 // 1. Space 개수 조회
                 const spacesData = await fetchStoreSpacesCount(storeId);
                 setSpaceCount(spacesData.count);
+                console.log('🔍 Space 개수:', spacesData.count);
                 
                 const timeParam = convertTimeToParam(time);
                 
@@ -413,8 +429,39 @@ const ShopDetailPage = () => {
                                 }, 100);
                                 return;
                             }
+                    } else if (urlState.type === 'agreement') {
+                        // /shop/:id/reservation/agreement로 접근한 경우 - 예약 상태 복원 후 데이터 로드
+                        console.log('🔍 Agreement URL 감지됨:', urlState);
+                        
+                        // loadStoreData에서는 showPiAgreement 상태 변경하지 않음 (의존성 배열에서 제거했으므로)
+                        
+                        const restored = restoreReservationState();
+                        console.log('🔍 예약 상태 복원 결과:', restored);
+                        if (restored) {
+                            const { selectedMenu } = useStore.getState();
+                            console.log('🔍 selectedMenu:', selectedMenu);
+                            if (selectedMenu && selectedMenu.space_id) {
+                                console.log('🔍 Space ID로 데이터 로드:', selectedMenu.space_id);
+                                const spaceData = await fetchSpaceDetails(selectedMenu.space_id, timeParam, accessToken);
+                                setStoreData(spaceData);
+                                setSelectedSpaceId(selectedMenu.space_id);
+                            } else {
+                                console.log('🔍 예약 페이지용 메뉴 데이터 로드');
+                                const menuData = await fetchStoreMenus(storeId, timeParam, accessToken);
+                                setStoreData(menuData);
+                            }
+                            console.log('🔍 Agreement 데이터 로드 완료');
+                            return;
+                        } else {
+                            console.log('🔍 예약 상태 복원 실패 - spaces로 리다이렉트');
+                            setTimeout(() => {
+                                navigate(`/shop/${storeId}/spaces`, { replace: true });
+                            }, 100);
+                            return;
+                        }
                     } else {
                         // 다른 URL로 접근한 경우 - /shop/:id/spaces로 리다이렉트
+                        console.log('🔍 알 수 없는 URL 상태 - spaces로 리다이렉트:', urlState);
                         navigate(`/shop/${storeId}/spaces`);
                     }
                 }
@@ -429,7 +476,7 @@ const ShopDetailPage = () => {
         if (id && time !== null) {
             loadStoreData();
         }
-    }, [id, time, accessToken, location.pathname, navigate, fromFavoritePage, fromSchedulePage]); // fromFavoritePage, fromSchedulePage 의존성 추가
+    }, [id, time, accessToken, location.pathname, navigate, fromFavoritePage, fromSchedulePage]); // showPiAgreement 제거
 
     // 특정 Space 선택 시 상세 데이터 로드
     const handleSpaceSelect = async (spaceId) => {
@@ -493,8 +540,9 @@ const ShopDetailPage = () => {
     const handleBack = () => {
         const urlState = getShopDetailStateFromUrl();
         
-        if (showPiAgreement) {
-            togglePiAgreement(); // 동의서 숨김
+        if (urlState.type === 'agreement') {
+            togglePiAgreement(); // false로 설정
+            navigate(`/shop/${id}/reservation`)
         } else if (urlState.type === 'reservation') {
             // 예약 페이지에서 뒤로가기: 메뉴 페이지로
             //cancelReservation(); // 예약 상태 초기화
@@ -567,11 +615,12 @@ const ShopDetailPage = () => {
 
     // 페이지 제목 결정
     const getPageTitle = () => {
+        const urlState = getShopDetailStateFromUrl();
         
-        if (showPiAgreement) {
+        if (urlState.type === 'agreement') {
             return '개인정보 제3자 제공 동의서';
         }
-        if (location.pathname.includes('/reservation')) {
+        if (urlState.type === 'reservation') {
             return '예약하기';
         }
         if (spaceCount >= 2 && selectedSpaceId && storeData) {
@@ -601,14 +650,21 @@ const ShopDetailPage = () => {
         <PageContainer>
             {/* 네브 바 영역 */}
             <NavBarContainer>
-                <TopNavBar
-                    onBack={handleBack}
-                    title={getPageTitle()}
-                    showLike={!location.pathname.includes('/reservation') && !showPiAgreement && !(spaceCount >= 2 && selectedSpaceId)}
-                    storeId={parseInt(id)}
-                    isLiked={isLiked}
-                    onLikeToggle={handleLikeToggle}
-                />
+                {(() => {
+                    console.log('🔍 렌더링 조건 확인 - showPiAgreement:', showPiAgreement);
+                    console.log('🔍 렌더링 조건 확인 - location.pathname:', location.pathname);
+                    console.log('🔍 렌더링 조건 확인 - urlState.type:', getShopDetailStateFromUrl().type);
+                    return (
+                        <TopNavBar
+                            onBack={handleBack}
+                            title={getPageTitle()}
+                            showLike={!location.pathname.includes('/reservation') && !showPiAgreement && !(spaceCount >= 2 && selectedSpaceId)}
+                            storeId={parseInt(id)}
+                            isLiked={isLiked}
+                            onLikeToggle={handleLikeToggle}
+                        />
+                    );
+                })()}
             </NavBarContainer>
     
             <ScrollContainer offsettop={72}>
