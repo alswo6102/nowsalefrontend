@@ -32,8 +32,7 @@ COPY --from=builder /app/build /usr/share/nginx/html
 # React Router를 사용할 경우, 404 에러를 방지하기 위한 설정 파일을 복사합니다.
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Nginx는 기본적으로 80번 포트를 사용합니다.
-EXPOSE 80
+EXPOSE 3000
 
 # 컨테이너 시작 시 Nginx를 실행합니다.
 CMD ["nginx", "-g", "daemon off;"]
