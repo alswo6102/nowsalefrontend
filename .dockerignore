@@ -1,0 +1,12 @@
+# 의존성 폴더
+node_modules
+
+# 빌드 결과물
+build
+
+# 깃 관련 폴더
+.git
+.gitignore
+
+# 환경 변수 파일
+.env
