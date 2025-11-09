@@ -17,6 +17,7 @@ RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm install --omit
 COPY . .
 
 # React 앱 빌드
+ENV NODE_OPTIONS="--max-old-space-size=4096"
 RUN npm run build
 
 # =================================================================
