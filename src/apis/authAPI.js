@@ -1,5 +1,5 @@
 // 사용자 인증 관련 API 함수들
-const REST_API_BASE_URL = 'https://buynow.n-e.kr';
+const REST_API_BASE_URL = 'https://buynow2.o-r.kr';
 
 /**
  * 구글 로그인/회원가입
