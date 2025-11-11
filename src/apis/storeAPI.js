@@ -1,5 +1,5 @@
 // 가게 관련 API 함수들
-const REST_API_BASE_URL = 'https://buynow.n-e.kr';
+const REST_API_BASE_URL = 'https://buynow2.o-r.kr';
 
 /**
  * 시간 파라미터를 API 형식으로 변환
